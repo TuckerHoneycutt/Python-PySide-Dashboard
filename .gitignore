@@ -1,0 +1,6 @@
+__pycache__
+builds/
+dist/
+venv/
+oconsole.spec
+build/ASCEND
