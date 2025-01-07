@@ -179,8 +179,8 @@ class MainWindow(QMainWindow):
         # Create time calculator page
         time_page = TC.TimeConverterWindow()
 
-        # Create coordinate calculator page (placeholder)
-        coord_page = QWidget()  # Replace with actual coordinate calculator widget
+        # Create coordinate calculator page
+        coord_page = CC.CoordinateConverterWindow()
 
         # Add pages to stacked widget
         self.stacked_widget.addWidget(home_page)

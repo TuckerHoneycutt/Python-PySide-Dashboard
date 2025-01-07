@@ -9,6 +9,7 @@ from PySide6.QtGui import QColor, QPalette, QScreen
 import pandas as pd
 import json
 
+
 import TimeTransformations as TT
 import WindowConfigFile as wc
 import HeaderDictionary as head
@@ -16,7 +17,7 @@ import HeaderDictionary as head
 class TimeConverterWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("ASCEND - Time Conversions")
+        self.setWindowTitle("ASCEND - Function Calculations")
 
         # Get screen size and set initial window size
         screen = QApplication.primaryScreen().availableGeometry()
@@ -91,17 +92,17 @@ class TimeConverterWindow(QMainWindow):
         self.button_group = []
 
         # Add conversion type buttons
-        time_types = list(head.Time_dict.keys()) + ["Date"]
-        for time_type in time_types:
-            btn = wc.SidebarButton(time_type)
-            btn.clicked.connect(lambda checked, t=time_type: self.handle_from_type_change(t))
+        function_types = head.Function_list
+        for function_type in function_types:
+            btn = wc.SidebarButton(function_type)
+            btn.clicked.connect(lambda checked, t=function_type: self.handle_from_type_change(t))
             sidebar_layout.addWidget(btn)
             self.button_group.append(btn)
 
         # Select first button by default
         if self.button_group:
             self.button_group[0].setChecked(True)
-            self.current_from_type = time_types[0]
+            self.current_from_type = function_types[0]
 
         # Add stretch to push buttons to top
         sidebar_layout.addStretch()
@@ -292,13 +293,7 @@ class TimeConverterWindow(QMainWindow):
 
         input_fields  = head.Time_dict
         labels = input_fields.get(self.current_from_type, [])
-        # Load existing data from file
-        try:
-            with open('Position_Time_Headers.json', 'r') as file:
-                self.user_data = json.load(file)
-        except FileNotFoundError:
-            self.user_data = {}
-            
+
         if 'JD' in labels or self.current_from_type == "Date":
             self.date_combo.show()
         else:
@@ -318,7 +313,13 @@ class TimeConverterWindow(QMainWindow):
             self.to_combo.hide()
 
         labels = [value for value in labels if "Ref" not in value]
-
+        # Load existing data from file
+        try:
+            with open('Position_Time_Headers.json', 'r') as file:
+                user_data = json.load(file)
+        except FileNotFoundError:
+            user_data = {}
+            
         for i, label_text in enumerate(labels):
             if i < len(self.input_labels):
                 self.input_labels[i].setText(label_text)
@@ -331,8 +332,8 @@ class TimeConverterWindow(QMainWindow):
                     combo = self.input_combos[i]
                     combo.clear()
                     combo.addItems(columns)
-                    if label_text in self.user_data.keys():
-                        common_values = list(filter(lambda x: x in columns, self.user_data[label_text]))
+                    if label_text in user_data.keys():
+                        common_values = list(filter(lambda x: x in columns, user_data[label_text]))
                         if len(common_values)>0:
                             combo.setCurrentText(common_values[0])
                     combo.show()
@@ -401,10 +402,11 @@ class TimeConverterWindow(QMainWindow):
                 needs_reference = True
                 ref_labels = [value for value in head.Time_dict[self.to_combo.currentText()] if "Ref" in value]
 
-        if self.current_from_type != "Date":  
-            if head.TimeFrame_dict[self.current_from_type] == "Local":
-                needs_reference = True
-                ref_labels = [value for value in head.Time_dict[self.current_from_type] if "Ref" in value]
+        if self.current_from_type == "Distance":  
+            print("coming")
+            # if head.TimeFrame_dict[self.current_from_type] == "Local":
+            #     needs_reference = True
+            #     ref_labels = [value for value in head.Time_dict[self.current_from_type] if "Ref" in value]
 
         if needs_reference:
             self.ref_BigLabel.show()
@@ -489,24 +491,24 @@ class TimeConverterWindow(QMainWindow):
             QMessageBox.warning(self, "Error", f"Conversion failed: {str(e)}")
 
     def convert_file(self):
+        headerfile = 'Position_Time_Headers.json'
+        # Load existing data from file
+        try:
+            with open(headerfile, 'r') as file:
+                user_data = json.load(file)
+        except FileNotFoundError:
+            user_data = {}
+        
         to_type = self.to_combo.currentText()
 
         try:
             # Regular input collection for other types
             input_values = []
-            for i, combo in enumerate(self.input_combos):
+            for combo in self.input_combos:
                 if combo.isVisible():
                     col = combo.currentText()
                     value = self.df[col]
-                    key = self.input_labels[i].text()
-                    
-                    if key in self.user_data.keys():
-                        if col not in self.user_data[key]:
-                            head.UpdateHeaders('Position_Time_Headers.json', self.user_data, key, col)
-                    else:
-                        head.UpdateHeaders('Position_Time_Headers.json', self.user_data, key, col)
-                        
-                    input_values.append(value)  
+                    input_values.append(value)
                 else:
                     input_values.append(None)
 

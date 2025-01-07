@@ -5,7 +5,97 @@ Spyder Editor
 This script will be used for all Coordanate Conversion as the 
 base of the ASCEND tool.
 """
+import sys
+import os
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton,
+                             QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
+                             QLineEdit, QCheckBox, QGridLayout, QMessageBox,
+                             QFileDialog, QSizePolicy, QScrollArea)
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QColor, QPalette, QScreen
+import pandas as pd
 from tkinter.font import Font
+
+# Modern UI Components
+class ModernComboBox(QComboBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setStyleSheet("""
+            QComboBox {
+                background-color: #2d2d2d;
+                color: white;
+                border: 2px solid #3d3d3d;
+                border-radius: 8px;
+                padding: 8px 15px;
+                min-width: 150px;
+                font-weight: 500;
+            }
+            QComboBox:hover, QComboBox:focus {
+                border-color: #2563eb;
+                background-color: #333333;
+            }
+            QComboBox::drop-down {
+                border: none;
+                padding-right: 15px;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2d2d2d;
+                color: white;
+                selection-background-color: #2563eb;
+                outline: none;
+                border-radius: 8px;
+                padding: 5px;
+            }
+        """)
+
+class ModernLineEdit(QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setStyleSheet("""
+            QLineEdit {
+                background-color: #2d2d2d;
+                color: white;
+                border: 2px solid #3d3d3d;
+                border-radius: 8px;
+                padding: 8px 15px;
+                min-width: 150px;
+                font-weight: 500;
+            }
+            QLineEdit:focus {
+                border-color: #2563eb;
+                background-color: #333333;
+            }
+            QLineEdit:disabled {
+                background-color: #252525;
+                color: #666;
+            }
+        """)
+
+class SidebarButton(QPushButton):
+    def __init__(self, text, parent=None):
+        super().__init__(text, parent)
+        self.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 15px;
+                text-align: left;
+                font-weight: 500;
+            }
+            QPushButton:hover {
+                background-color: #2563eb;
+            }
+            QPushButton:checked {
+                background-color: #1d4ed8;
+            }
+        """)
+        self.setCheckable(True)
+        self.setMinimumHeight(50)
+
+
+
 
 entrysize = 130
 linespace = 25

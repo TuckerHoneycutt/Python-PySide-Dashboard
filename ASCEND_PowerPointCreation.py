@@ -174,8 +174,8 @@ title_str = "ASCEND – TriVector's System Engineering Tool"
 cover_photo = r"C:\Users\kayla.green\Documents\Tools\Photos\Cover_Picture_Trivector.png"
 savepath = r"C:\Users\kayla.green\Documents\Tools\presentation.pptx"
 
-SlideOrder = ["Title", "Conclusion", "Overview", "Updates"]
+SlideOrder = ["Title", "Conclusion", "Overview"]
 ASCEND_ppt_creation(SlideOrder, title_str, cover_photo, savepath)
 
-SlideOrder = ["Title", "Mission Overview", "Test Objectives", "Analysis Objectives", "Go-No-Go Criteria", "JIRA"]
+#SlideOrder = ["Title", "Mission Overview", "Test Objectives", "Analysis Objectives", "Go-No-Go Criteria", "JIRA"]
 #(SlideOrder, title_str, cover_photo, savepath)

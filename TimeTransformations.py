@@ -1,18 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Spyder Editor
-
-This script will be used for all Coordanate Conversion as the 
+This script will be used for all Time Conversions as the 
 base of the ASCEND tool.
 """
-#epoch
-#gps
-#TOD
-#SSM
-#JD
-#Date
-#string_date
-#MIC
 
 import numpy as np
 import pandas as pd
@@ -230,16 +219,19 @@ def ssm2tod(ssm): #V&V
         return [convert_single_ssm2tod(x) for x in ssm]
     else:
         # Otherwise, assume ssm is a single value
-        return convert_single_ssm2tod(ssm)
+        return convert_single_ssm2tod(float(ssm))
 
 def convert_single_ssm2mci(ssm, reftod, refmci): #V&V
     refssm = tod2ssm(reftod)
-    print('in Single')
+
+    print("Single Input")
     print(ssm)
     print(refssm)
-    delta_mci = (ssm - refssm) * 10
+    delta_mci = (float(ssm) - refssm) * 10
+    print("delta")
+    print(delta_mci)
     
-    return refmci + delta_mci
+    return float(refmci) + delta_mci
 
 def ssm2mci(ssm, reftod, refmci): #V&V
     
@@ -286,14 +278,14 @@ def mci2ssm(year, jd, mci, reftod, refmci): #V&V
         return convert_single_mci2ssm(year, jd, mci, reftod, refmci)
 
 def convert_single_mci2ssm(year, jd, mci, reftod, refmci): #V&V
-    year, month, day = jd2intdate(year, jd)
+    year, month, day = jd2intdate(int(year), int(jd))
     date_datetime = datetime(year, month, day)
     reftod_datetime = datetime.strptime(reftod, time_format).time()  # Adjust time format if needed
 
     # Combine into a datetime object
     dt = datetime.combine(date_datetime, reftod_datetime)
     
-    seconds_delta = (mci - refmci) / 10
+    seconds_delta = (float(mci) - float(refmci)) / 10
 
     newdate = dt + timedelta(seconds=seconds_delta)
     
@@ -444,29 +436,41 @@ def strdate2intdate(date): #V&V
 def MasterTimeConvert(InputUnit, OutputUnit, input1var= np.nan, input2var= np.nan, 
                              input3var= np.nan, input4var= np.nan, indate = 'JD', refput1var= np.nan, 
                              refput2var= np.nan, outdate = 'JD'):
-    
-    if input1var == "":
-        input1var = 0
 
-    if input2var == "":
-        input2var = 0 
+    print(input1var, input2var, input3var, input4var)
+    
+    if type(input1var) == str:
+        if input1var == "":
+            input1var = 0
+    
+        if input2var == "":
+            input2var = 0 
+    
+        if InputUnit == "Date":
+            InputUnit = indate
+            
+        if OutputUnit == "Date":
+            OutputUnit = outdate
 
     if InputUnit != "EPOCH" and InputUnit != "GPS":
         if ((InputUnit != "TOD" and OutputUnit != "SSM") or 
         (InputUnit != "TOD" and OutputUnit != "MCI") or 
         (InputUnit != "SSM" and OutputUnit != "MCI")):
-            
+            print("sub")
             if indate != "JD":
-                
                 if indate == "Int_Date":
-                    input1var, input2var = intdate2jd(input1var, input2var, 
-                                                              input3var)
+                    input1var, input2var = intdate2jd(int(input1var), int(input2var), 
+                                                              int(input3var))
                     input3var = input4var
-
+                    
                 elif indate == "Str_Date":
-
                     input3var = input2var
                     input1var, input2var = strdate2jd(input1var)
+                
+                InputUnit = "JD"
+                indate = "JD"
+                
+    print("date input")
 
     if InputUnit == "EPOCH": 
         if OutputUnit == "GPS":
@@ -481,7 +485,10 @@ def MasterTimeConvert(InputUnit, OutputUnit, input1var= np.nan, input2var= np.na
 
         elif OutputUnit == "MCI":
             res1, res2, res3 = epoch2mci(input1var, input2var, refput1var, refput2var)  
-        
+            
+        elif OutputUnit == "EPOCH":
+            res1 = (float(input1var)*1e9) + (int(input2var))
+
     elif InputUnit == "GPS":
         if OutputUnit == "EPOCH":
             res1 = gps2epoch(input1var, input2var)
@@ -494,6 +501,9 @@ def MasterTimeConvert(InputUnit, OutputUnit, input1var= np.nan, input2var= np.na
             
         elif OutputUnit == "MCI":
             res1, res2, res3 = gps2mci(input1var, input2var, refput1var, refput2var)
+        
+        elif OutputUnit == "GPS":
+            res1 = (float(input1var)*1e9) + (int(input2var))
             
     elif InputUnit == "TOD":
         if OutputUnit == "EPOCH":
@@ -503,12 +513,13 @@ def MasterTimeConvert(InputUnit, OutputUnit, input1var= np.nan, input2var= np.na
             res1 = tod2gps(input1var, input2var, input3var) 
             
         elif OutputUnit == "SSM":
-            if type(input3var) != list: 
-                if pd.isna(input3var):
-                    res1 = tod2ssm(input1var)
-                    return res1
+            
+            if pd.isna(input3var):
+                res1 = tod2ssm(input1var)
+                return res1
             
             else:
+                print(input1var, input2var)
                 res1 = input1var
                 res2 = input2var
                 res3 = tod2ssm(input3var)  
@@ -524,6 +535,10 @@ def MasterTimeConvert(InputUnit, OutputUnit, input1var= np.nan, input2var= np.na
                 res2 = input2var
                 res3 = tod2mci(input3var, refput1var, refput2var)
 
+        elif OutputUnit == "TOD":
+            res1 = input1var
+            res2 = input2var
+            res3 = input3var
             
     elif InputUnit == "SSM":
         if OutputUnit == "EPOCH":
@@ -533,6 +548,10 @@ def MasterTimeConvert(InputUnit, OutputUnit, input1var= np.nan, input2var= np.na
             res1 = ssm2gps(input1var, input2var, input3var) 
             
         elif OutputUnit == "TOD":
+            print('Converting to SSM')
+            print(input3var)
+            print(type(input3var))
+
             res1 = input1var
             res2 = input2var
             res3 = ssm2tod(input3var)  
@@ -547,66 +566,57 @@ def MasterTimeConvert(InputUnit, OutputUnit, input1var= np.nan, input2var= np.na
                 res1 = input1var
                 res2 = input2var
                 res3 = ssm2mci(input3var, refput1var, refput2var)
-    
+        
+        elif OutputUnit == "SSM":
+            res1 = input1var
+            res2 = input2var
+            res3 = input3var
+                
     elif InputUnit == "MCI":
+        print("in MCI")
         if OutputUnit == "EPOCH":
-            res1 = mci2epoch()
+            res1 = mci2epoch(input1var, input2var, input3var, refput1var, refput2var)
             
         elif OutputUnit == "GPS":
-            res1 = mci2gps() 
+            res1 = mci2gps(input1var, input2var, input3var, refput1var, refput2var) 
             
         elif OutputUnit == "TOD":
-            res1, res2, res3 = mci2tod()  
+            res1, res2, res3 = mci2tod(input1var, input2var, input3var, refput1var, refput2var)  
             
         elif OutputUnit == "SSM":
-            res1, res2, res3 = mci2ssm()
+            res1, res2, res3 = mci2ssm(input1var, input2var, input3var, refput1var, refput2var)
+        
+        elif OutputUnit == "MCI":
+            res1, res2, res3 = input1var, input2var, input3var
+
+    if OutputUnit == "Int_Date":
+        res1, res2, res3 = jd2intdate(input1var, input2var)
+        
+        return res1, res2, res3
     
-    elif InputUnit == "JD":
-        if OutputUnit == "Int_Date":
-            res1, res2, res3 = jd2intdate(input1var, input2var)
-            
-            return res1, res2, res3
+    elif OutputUnit == "Str_Date":
+        res1 = jd2strdate(input1var, input2var) 
         
-        elif OutputUnit == "Str_Date":
-            res1 = jd2strdate(input1var, input2var) 
-            
-            return res1
+        return res1
+    
+    elif OutputUnit == "JD":
+        res1, res2 = input1var, input2var
         
-    elif InputUnit == "Int_Date":
-        if OutputUnit == "JD":
-            res1, res2 = intdate2jd(input1var, input2var, input3var)
-            
-            return res1, res2 
-            
-        elif OutputUnit == "Str_Date":
-            res1 = intdate2strdate(input1var, input2var, input3var)   
-            
-            return res1
-        
-    elif InputUnit == "Str_Date":
-        if OutputUnit == "JD":
-            res1, res2 = strdate2jd(input1var)
-            
-            return res1, res2 
-        
-        elif OutputUnit == "Int_Date":
-            res1, res2, res3 = strdate2intdate(input1var) 
-            
-            return res1, res2, res3
+        return res1, res2
         
     if OutputUnit != "EPOCH" and OutputUnit != "GPS":
-        if indate == "JD":
-            if outdate == "Int_Date":
-                res1date, res2date, res3date = jd2intdate(res1, res2)
-                
-                return res1date, res2date, res3date, res3
+        #if indate == "JD":
+        if outdate == "Int_Date":
+            res1date, res2date, res3date = jd2intdate(res1, res2)
             
-            elif outdate == "Str_Date":
-                res1date = jd2strdate(res1, res2)
+            return res1date, res2date, res3date, res3
+        
+        elif outdate == "Str_Date":
+            res1date = jd2strdate(res1, res2)
 
-                return res1date, res3
-            
-        return res1, res2, res3
+            return res1date, res3
+        else:    
+            return res1, res2, res3
     
     else:
         return res1
