@@ -69,3 +69,12 @@ Function_list = ['Distance', 'Time Calculations', 'Summary']
 
 #Could be a better way to handle the headers and type
 d = {'a1': {'b1': 1, 'b2': 2}, 'a2': {'b1': 3, 'b2': 4}}
+
+	
+
+Convertion_dict = {
+    "Temperature": ["Kelvin", "Celsius", "Fahrenheit"],
+    "Volume": ["Litre","Millilitre","Kilolitre","Gallon","Pint", "Fluid Ounce"],
+    "Mass":["Gram","Milligram","Kilogram", "Ounce", "Pound", "Ton"],
+    "Length":["Meter", "Kilometer", "Centimeter", "Millimeter", "Feet", "Yard", "Inch", "Mile"]
+}
